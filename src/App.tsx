@@ -2,8 +2,10 @@ import { Box, Card, CardContent, CardHeader, CssBaseline, FormGroup, Grid, TextF
 import React, { useCallback, useEffect, useState } from 'react';
 import Weather from './entities/Weather';
 import OpenWeatherProvider from './providers/OpenWeatherProvider';
+import MsnProvider from "./providers/MsnProvider";
 const providers = [
-  new OpenWeatherProvider("6d0e27996f99802be89d9575a5dfb7ca")
+  new OpenWeatherProvider("6d0e27996f99802be89d9575a5dfb7ca"),
+  new MsnProvider()
 ];
 
 function App() {

@@ -56,9 +56,8 @@ async function getData(city: string, apiKey: string): Promise<OpenWeatherData> {
     weather.setUnits('metric');
     weather.setCity(city);
     weather.setAPPID(apiKey);
-    return new Promise((resolve, reject) => weather.getWeatherForecastForDays(7, function(err: string, obj: OpenWeatherData){
+    return new Promise((resolve, reject) => weather.getWeatherForecastForDays(5, function(err: string, obj: OpenWeatherData){
         if (!err) {
-            console.log(obj);
             resolve(obj);
         } else {
             reject(err)
