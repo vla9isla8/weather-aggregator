@@ -82,7 +82,7 @@ type MsnData = {
 }
 
 async function getData(city: string) {
-    const resp = await fetch(`http://weather.service.msn.com/data.aspx?weasearchstr=${city}&culture=ru-RU&weadegreetype=C&src=outlook`)
+    const resp = await fetch(`https://weather.service.msn.com/data.aspx?weasearchstr=${city}&culture=ru-RU&weadegreetype=C&src=outlook`)
     const values = await xml2js.parseStringPromise(await resp.text(), { charkey: 'C$', attrkey: 'A$', explicitArray: true, mergeAttrs: true });
     return values.weatherdata.weather[0] as MsnData;
 }
