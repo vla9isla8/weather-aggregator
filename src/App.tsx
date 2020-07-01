@@ -47,7 +47,7 @@ function App() {
         <Box flex={1} overflow="auto">
             {Object.keys(datas).map((provider)=> (
                 <Box key={provider} padding={3}>
-                  <Typography variant="h3">{provider}</Typography>
+                  <Typography variant="h4">{provider}</Typography>
                   <Box paddingTop={3}>
                     <Grid container spacing={2} >
                       {datas[provider].map((data,idx) => (
