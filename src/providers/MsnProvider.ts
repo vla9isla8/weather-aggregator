@@ -82,7 +82,11 @@ type MsnData = {
 }
 
 async function getData(city: string) {
-    const resp = await fetch(`https://weather.service.msn.com/data.aspx?weasearchstr=${city}&culture=ru-RU&weadegreetype=C&src=outlook`)
+    const resp = await fetch(
+        encodeURI(
+            `https://weather.service.msn.com/data.aspx?weasearchstr=${city}&culture=ru-RU&weadegreetype=C&src=outlook`
+        )
+    );
     const values = await xml2js.parseStringPromise(await resp.text(), { charkey: 'C$', attrkey: 'A$', explicitArray: true, mergeAttrs: true });
     return values.weatherdata.weather[0] as MsnData;
 }
@@ -92,7 +96,6 @@ export default class MsnProvider implements IProvider {
     async getWeather(city: string) {
         try {
             const data = await getData(city);
-            console.log(data)
             return data.forecast.map(data => new Weather(
                 new Date(data.date[0]),
                 parseFloat(data.high[0]),
