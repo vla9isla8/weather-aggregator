@@ -2,6 +2,7 @@
   "name": "weatcher-aggregator",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://vla9isla8.github.io/weather-aggregator",
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "@testing-library/jest-dom": "^4.2.4",
