@@ -1,4 +1,10 @@
-import { AppBar, Box, Card, CardContent, CardHeader, Checkbox, createStyles, CssBaseline, Divider, FormControlLabel, FormGroup, IconButton, Paper, SwipeableDrawer, TextField, Theme, Toolbar, Typography, WithStyles, withStyles } from "@material-ui/core";
+import { 
+  AppBar, Box, Card, CardContent, CardHeader, 
+  Checkbox, createStyles, CssBaseline, Divider, 
+  FormControlLabel, FormGroup, IconButton, Paper, 
+  SwipeableDrawer, TextField, Theme, Toolbar, 
+  Typography, WithStyles, withStyles
+} from "@material-ui/core";
 import { Menu } from "@material-ui/icons";
 import clsx from 'clsx';
 import moment from "moment";
@@ -56,7 +62,8 @@ const styles = (theme: Theme) => createStyles({
     display: 'none',
   },
 })
-
+//@ts-ignore
+const iOS = process.browser && /iPad|iPhone|iPod/.test(navigator.userAgent);
 function App({classes}: WithStyles<typeof styles>) {
   const [datas, setDatas] = useState<{[key: string]:Weather[]}>({});
   const [selectedProviders, setSelectedProviders] = useState<{[key: string]:boolean}>({});
@@ -83,13 +90,18 @@ function App({classes}: WithStyles<typeof styles>) {
     let breaked = {v:false};
     const get = async () => {
       const data: {[key: string]: Weather[]} = {};
-      for (const provider of providers.filter(({name}) => selectedProviders[name] === undefined ? true : selectedProviders[name])) {
-        provider.getWeather(city).then(value=> {
-          data[provider.name] = value || [];
-          if (!breaked.v) {
-            setDatas({...data});
-          }
-        });
+      const filteredProviders = providers.filter(({ name }) => selectedProviders[name] === undefined ? true : selectedProviders[name]);
+      if (filteredProviders.length > 0) {
+        for (const provider of filteredProviders) {
+          provider.getWeather(city).then(value=> {
+            data[provider.name] = value || [];
+            if (!breaked.v) {
+              setDatas({...data});
+            }
+          });
+        }
+      } else {
+        setDatas({});
       }
     };
     get();
@@ -140,8 +152,8 @@ function App({classes}: WithStyles<typeof styles>) {
         </Toolbar>
       </AppBar>
       <SwipeableDrawer
+        disableBackdropTransition={!iOS}
         className={classes.drawer}
-        variant="persistent"
         anchor="left"
         open={open}
         onClose={toggleDrawerOpen}
@@ -150,22 +162,24 @@ function App({classes}: WithStyles<typeof styles>) {
           paper: classes.drawerPaper,
         }}
       >
-        <Typography>Провайдеры</Typography>
-        <FormGroup >
-          {providers.map(({name})=>(
-            <FormControlLabel label={name} control={
-              <Checkbox
-                name={`checked${name}`}
-                color="primary"
-                checked={selectedProviders[name] === undefined ? true : selectedProviders[name]}
-                onChange={(_,checked)=> setSelectedProviders(selectedProviders=> ({
-                  ...selectedProviders,
-                  [name]: checked
-                }))}
-              />
-            }/>
-          ))}
-        </FormGroup>
+        <Box padding={1}>
+          <Typography variant="h6">Провайдеры</Typography>
+          <FormGroup >
+            {providers.map(({name})=>(
+              <FormControlLabel label={name} control={
+                <Checkbox
+                  name={`checked${name}`}
+                  color="primary"
+                  checked={selectedProviders[name] === undefined ? true : selectedProviders[name]}
+                  onChange={(_,checked)=> setSelectedProviders(selectedProviders=> ({
+                    ...selectedProviders,
+                    [name]: checked
+                  }))}
+                />
+              }/>
+            ))}
+          </FormGroup>
+        </Box>
       </SwipeableDrawer>
       <Box display="flex" flexDirection="column" height={1} overflow="hidden" className={classes.root}>
         <Box flex={1} overflow="auto">
@@ -173,14 +187,12 @@ function App({classes}: WithStyles<typeof styles>) {
                 <Box key={provider} padding={3}>
                   <Typography variant="h4" className={classes.providerHeader}>{provider}</Typography>
                   <Box paddingTop={3} paddingBottom={3}>
-                    <Box display="flex" flexDirection='row'>
+                    <Box display="flex" flexDirection='row' flexWrap="wrap" >
                       {datas[provider].map((data,idx) => (
                         <Box
                           key={idx}
                           flex={1} 
-                          padding={1} 
-                          paddingLeft={idx === 0 ? 0 : undefined}
-                          paddingRight={datas[provider].length - 1 === idx ? 0 : undefined}
+                          padding={1}
                         >
                           <Box component={Card} height={1} >
                             <CardHeader title={moment(data.date).format("dddd, LD")}/>
