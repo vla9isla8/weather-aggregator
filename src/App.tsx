@@ -1,12 +1,11 @@
-import { 
-  AppBar, Box, Card, CardContent, CardHeader, 
-  Checkbox, createStyles, CssBaseline, Divider, 
-  FormControlLabel, FormGroup, IconButton, Paper, 
-  SwipeableDrawer, TextField, Theme, Toolbar, 
+import {
+  AppBar, Box, Card, CardContent, CardHeader,
+  Checkbox, createStyles, CssBaseline, Divider,
+  FormControlLabel, FormGroup, IconButton, Paper,
+  SwipeableDrawer, TextField, Theme, Toolbar,
   Typography, WithStyles, withStyles
 } from "@material-ui/core";
 import { Menu } from "@material-ui/icons";
-import clsx from 'clsx';
 import moment from "moment";
 import "moment/locale/ru";
 import React, { useCallback, useEffect, useState } from 'react';
@@ -32,21 +31,12 @@ const styles = (theme: Theme) => createStyles({
     display: "inline-block",
     position: 'sticky', 
     top: 0,
+    backgroundColor: theme.palette.background.default,
     opacity: 0.6
   },
-  appBar: {
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-  },
-  appBarShift: {
-    width: `calc(100% - ${drawerWidth}px)`,
-    marginLeft: drawerWidth,
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
+  weather: {
+    position: 'sticky', 
+    top: 0
   },
   drawer: {
     width: drawerWidth,
@@ -57,10 +47,7 @@ const styles = (theme: Theme) => createStyles({
   },
   menuButton: {
     marginRight: theme.spacing(2),
-  },
-  hide: {
-    display: 'none',
-  },
+  }
 })
 //@ts-ignore
 const iOS = process.browser && /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -123,12 +110,7 @@ function App({classes}: WithStyles<typeof styles>) {
   return (
     <>
       <CssBaseline/>
-      <AppBar 
-          position="fixed"
-          className={clsx(classes.appBar, {
-            [classes.appBarShift]: open,
-          })}
-        >
+      <AppBar position="fixed">
         <Toolbar>
           <IconButton
             color="inherit"
@@ -185,7 +167,7 @@ function App({classes}: WithStyles<typeof styles>) {
         <Box flex={1} overflow="auto">
             {Object.keys(datas).map((provider)=> (
                 <Box key={provider} padding={3}>
-                  <Typography variant="h4" className={classes.providerHeader}>{provider}</Typography>
+                  <Typography variant="h4" className={classes.providerHeader} >{provider}</Typography>
                   <Box paddingTop={3} paddingBottom={3}>
                     <Box display="flex" flexDirection='row' flexWrap="wrap" >
                       {datas[provider].map((data,idx) => (
