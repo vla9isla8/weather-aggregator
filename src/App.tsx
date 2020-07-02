@@ -1,4 +1,4 @@
-import { AppBar, Box, Card, CardContent, CardHeader, Checkbox, createStyles, CssBaseline, Divider, Drawer, FormControlLabel, FormGroup, IconButton, Paper, TextField, Theme, Toolbar, Typography, WithStyles, withStyles } from "@material-ui/core";
+import { AppBar, Box, Card, CardContent, CardHeader, Checkbox, createStyles, CssBaseline, Divider, FormControlLabel, FormGroup, IconButton, Paper, SwipeableDrawer, TextField, Theme, Toolbar, Typography, WithStyles, withStyles } from "@material-ui/core";
 import { Menu } from "@material-ui/icons";
 import clsx from 'clsx';
 import moment from "moment";
@@ -139,11 +139,13 @@ function App({classes}: WithStyles<typeof styles>) {
           </Paper>
         </Toolbar>
       </AppBar>
-      <Drawer
+      <SwipeableDrawer
         className={classes.drawer}
         variant="persistent"
         anchor="left"
         open={open}
+        onClose={toggleDrawerOpen}
+        onOpen={toggleDrawerOpen}
         classes={{
           paper: classes.drawerPaper,
         }}
@@ -164,7 +166,7 @@ function App({classes}: WithStyles<typeof styles>) {
             }/>
           ))}
         </FormGroup>
-      </Drawer>
+      </SwipeableDrawer>
       <Box display="flex" flexDirection="column" height={1} overflow="hidden" className={classes.root}>
         <Box flex={1} overflow="auto">
             {Object.keys(datas).map((provider)=> (
