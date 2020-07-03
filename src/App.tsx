@@ -1,14 +1,15 @@
 import {
   AppBar, Box, Card, CardContent, CardHeader,
-  Checkbox, createStyles, CssBaseline, Divider,
+  Checkbox, createStyles, CssBaseline,
   FormControlLabel, FormGroup, IconButton, Paper,
-  SwipeableDrawer, TextField, Theme, Toolbar,
+  SwipeableDrawer,
+  Tab, Tabs, TextField, Theme, Toolbar,
   Typography, WithStyles, withStyles
 } from "@material-ui/core";
 import { Menu } from "@material-ui/icons";
 import moment from "moment";
 import "moment/locale/ru";
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Weather from './entities/Weather';
 import IProvider from "./providers/IProvider";
 import MsnProvider from "./providers/MsnProvider";
@@ -25,7 +26,10 @@ const drawerWidth = 240;
 
 const styles = (theme: Theme) => createStyles({
   root: {
-    paddingTop: 64
+    paddingTop: 128
+  },
+  field: {
+    flex: 1
   },
   providerHeader: {
     display: "inline-block",
@@ -49,10 +53,23 @@ const styles = (theme: Theme) => createStyles({
     marginRight: theme.spacing(2),
   }
 })
+
+type DataType = {
+  provider: string, 
+  data: {
+    [
+      /**
+       * Iso date
+       */
+      key: string
+    ]: Weather
+  }
+};
+
 //@ts-ignore
 const iOS = process.browser && /iPad|iPhone|iPod/.test(navigator.userAgent);
 function App({classes}: WithStyles<typeof styles>) {
-  const [datas, setDatas] = useState<{[key: string]:Weather[]}>({});
+  const [datas, setDatas] = useState<DataType[]>([]);
   const [selectedProviders, setSelectedProviders] = useState<{[key: string]:boolean}>({});
   const [city, setCity] = useState<string>("");
 
@@ -76,19 +93,28 @@ function App({classes}: WithStyles<typeof styles>) {
   useEffect(() => {
     let breaked = {v:false};
     const get = async () => {
-      const data: {[key: string]: Weather[]} = {};
-      const filteredProviders = providers.filter(({ name }) => selectedProviders[name] === undefined ? true : selectedProviders[name]);
+      const data: DataType[] = [];
+      const filteredProviders = providers.filter(
+        ({ name }) => selectedProviders[name] === undefined ? true : selectedProviders[name]
+      );
       if (filteredProviders.length > 0) {
         for (const provider of filteredProviders) {
-          provider.getWeather(city).then(value=> {
-            data[provider.name] = value || [];
+          provider.getWeather(city).then((value: Weather[] = []) => {
+            const valuesMap = value.reduce((prev, next) => ({
+              ...prev,
+              [next.date.getDate()]: next
+            }), {} as DataType["data"]);
+            data.push({
+              data: valuesMap,
+              provider: provider.name
+            });
             if (!breaked.v) {
-              setDatas({...data});
+              setDatas([...data]);
             }
           });
         }
       } else {
-        setDatas({});
+        setDatas([]);
       }
     };
     get();
@@ -107,6 +133,10 @@ function App({classes}: WithStyles<typeof styles>) {
     localStorage.setItem("selectedProviders",JSON.stringify(selectedProviders));
   },[selectedProviders]);
 
+  const [tab, setTab] = React.useState(moment().date());
+
+  const tabs = useMemo(() => new Array(5).fill(null).map((_,idx)=>moment().add("day",idx)),[]);
+
   return (
     <>
       <CssBaseline/>
@@ -121,9 +151,10 @@ function App({classes}: WithStyles<typeof styles>) {
           >
             <Menu/>
           </IconButton>
-          <Paper>
-            <Box padding={1}>
+          <Paper className={classes.field}>
+            <Box paddingLeft={1} paddingRight={1}>
               <TextField
+                fullWidth
                 name="city" 
                 label="Город" 
                 value={city}
@@ -132,6 +163,13 @@ function App({classes}: WithStyles<typeof styles>) {
             </Box>
           </Paper>
         </Toolbar>
+        <Box flex={1} overflow="hidden">
+            <Tabs value={tab} onChange={(_,v)=>setTab(v)} variant="scrollable" >
+                {tabs.map(v=> (
+                  <Tab value={v.date()} label={v.format("dddd, L")} />
+                ))}
+            </Tabs>
+          </Box>
       </AppBar>
       <SwipeableDrawer
         disableBackdropTransition={!iOS}
@@ -163,35 +201,26 @@ function App({classes}: WithStyles<typeof styles>) {
           </FormGroup>
         </Box>
       </SwipeableDrawer>
-      <Box display="flex" flexDirection="column" height={1} overflow="hidden" className={classes.root}>
-        <Box flex={1} overflow="auto">
-            {Object.keys(datas).map((provider)=> (
-                <Box key={provider} padding={3}>
-                  <Typography variant="h4" className={classes.providerHeader} >{provider}</Typography>
-                  <Box paddingTop={3} paddingBottom={3}>
-                    <Box display="flex" flexDirection='row' flexWrap="wrap" >
-                      {datas[provider].map((data,idx) => (
-                        <Box
-                          key={idx}
-                          flex={1} 
-                          padding={1}
-                        >
-                          <Box component={Card} height={1} >
-                            <CardHeader title={moment(data.date).format("dddd, LD")}/>
-                            <CardContent>
-                              <Typography variant="subtitle2">Днем: <b>{data.tempreratureDay}&#176;</b></Typography>
-                              <Typography variant="subtitle2">Ночью: <b>{data.tempreratureNight}&#176;</b></Typography>
-                              <Typography variant="subtitle1">{data.description}</Typography>
-                            </CardContent>
-                          </Box>
-                        </Box>
-                      ))}
+      <Box className={classes.root}>
+          {datas.map(({provider,data})=> (
+            <Box display="inline-block" paddingTop={1} paddingBottom={1} key={provider} >
+                {data[tab] && (
+                  <Box
+                    flex={1} 
+                    padding={1}
+                  >
+                    <Box component={Card} height={1} >
+                      <CardHeader title={provider} />
+                      <CardContent>
+                        <Typography variant="subtitle2">Днем: <b>{data[tab].tempreratureDay}&#176;</b></Typography>
+                        <Typography variant="subtitle2">Ночью: <b>{data[tab].tempreratureNight}&#176;</b></Typography>
+                        <Typography variant="subtitle1">{data[tab].description}</Typography>
+                      </CardContent>
                     </Box>
                   </Box>
-                  <Divider/>
-                </Box>
-            ))}
-        </Box>
+                )}
+            </Box>          
+        ))}
       </Box>
     </>
   );

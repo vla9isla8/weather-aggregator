@@ -104,7 +104,7 @@ export default class MsnProvider implements IProvider {
             ));
         } catch(e) {
             console.error(e);
-            return null;
+            return undefined;
         }
     };
 }

@@ -79,7 +79,7 @@ export default class OpenWeatherProvider implements IProvider {
             ));
         } catch(e) {
             console.error(e);
-            return null;
+            return undefined;
         }
     }
 }

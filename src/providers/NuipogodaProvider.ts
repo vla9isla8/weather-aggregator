@@ -33,6 +33,6 @@ export default class NuipogodaProvider implements IProvider {
         } catch(e) {
             console.error(e);
         }
-        return null;
+        return undefined;
     };
 }
